@@ -1,10 +1,11 @@
 const { ObjectId } = require('mongodb')
-const {collections} = require("../mongoDBConfig/collections")
-const { readDoc, updateDoc } = require("../mongoDBConfig/queries")
+const { collections } = require("../mongoDBConfig/collections")
+const { updateDoc } = require("../mongoDBConfig/queries")
 
-const getUsers = async (req, res) => {
+const getUsersByRole = async (req, res) => {
   try {
-    const users = await readDoc(collections("users"))
+    const { role } = req.query
+    const users = await collections("users").find({ role }).toArray()
     res.status(200).json(users)
   } catch (err) {
     console.log(err)
@@ -19,17 +20,6 @@ const updateUser = async (req, res) => {
   } catch (err) {
     console.log(err)
     res.status(500).json({ error: 'Internal Server Error' });
-  }
-}
-
-const getUserRole = async (req, res) => {
-  try {
-    const user = await collections("users").findOne({ email: req.query?.email })
-    const role = user.role || "user"
-    res.status(200).json({ role })
-  } catch (err) {
-    console.log(err)
-    res.status(500).json({ error: 'Internal Server Error' })
   }
 }
 
@@ -50,9 +40,19 @@ const getOneUser = async (req, res) => {
   }
 }
 
+const blockUser = async (req, res) => {
+  try {
+    const info = await updateDoc(req, collections("users"))
+    res.status(200).json({info, status: 200})
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
 module.exports = {
-  getUsers,
+  getUsersByRole,
   updateUser,
-  getUserRole,
   getOneUser,
+  blockUser,
 }

@@ -9,7 +9,7 @@ const readDoc = (collection) => collection.find({}).toArray()
 // update a mongodb document
 const updateDoc = (req, collection, ) => collection.updateOne(
     {
-        _id: ObjectId(req.params.id)
+        _id: new ObjectId(req.params.id)
     },
     {
         $set: req.body
@@ -18,12 +18,12 @@ const updateDoc = (req, collection, ) => collection.updateOne(
 
 // delete a mongodb document
 const deleteDoc = (req, collection) => collection.deleteOne({
-    _id: ObjectId(req.params.id)
+    _id: new ObjectId(req.params.id)
 })
 
 // read a mongodb document
 const readOneDoc = (req, collection) => collection.findOne({
-    _id: ObjectId(req.params.id)
+    _id: new ObjectId(req.params.id)
 })
 
 

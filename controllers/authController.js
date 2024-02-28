@@ -5,19 +5,20 @@ const { createDoc } = require("../mongoDBConfig/queries")
 
 const signup = async (req, res) => {
     try {
-        const { pin, email, mobile, nid } = req.body;
+        const { pin, email, mobile, nid, time } = req.body;
         const user = await collections("users").findOne({ $or: [{ email }, { mobile }, { nid }] })
         if (!user?.email) {
             delete req.body.pin
             const hashPin = await bcrypt.hash(pin, 10)
-            const pinResult = await collections("pinss").insertOne({ email, pin: hashPin })
+            const pinResult = await collections("pins").insertOne({ email, pin: hashPin })
             if (pinResult) {
                 const token = jwt.sign({ user: { email } }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' })
-                req.body.balance = "40"
+                req.body.balance = req.body.role === "Agent" ? 100000 : 40
                 const userResult = await createDoc(req, collections("users"))
                 if (userResult) {
-                    const transactionResult = await collections("transactions").insertOne({ email, amount: "40", type: "Signup Bonus" })
-                    return res.status(200).json({ status: 200, userResult, token, transactionResult })
+                    const bonusInfo = { [req.body.role === "Agent" ? "agent" : "reciever"]: email, amount: req.body.balance, type: "Signup Bonus", time }
+                    const transactionResult = await collections("transactions").insertOne(bonusInfo)
+                    return res.status(200).json({ status: 200, userResult, user: req.body, token, transactionResult })
                 }
                 return res.status(500).json({ error: "Account could not be created" })
             }
@@ -49,7 +50,7 @@ const login = async (req, res) => {
         const { email, mobile, pin } = req.body
         const user = await collections("users").findOne({ $or: [{ email }, { mobile }] })
         if (user?.email) {
-            const dbPin = await collections("pinss").findOne({ email: user.email })
+            const dbPin = await collections("pins").findOne({ email: user.email })
             const isMatched = await bcrypt.compare(pin, dbPin.pin);
             if (isMatched) {
                 const token = jwt.sign({ user: { email } }, process.env.ACCESS_TOKEN_SECRET, { expiresIn: '7d' })

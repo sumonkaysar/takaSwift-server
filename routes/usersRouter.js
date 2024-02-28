@@ -1,15 +1,14 @@
-const { getUsers, getUserRole, getOneUser, updateUser } = require("../controllers/usersController")
+const { getOneUser, updateUser, getUsersByRole, blockUser } = require("../controllers/usersController")
+const { verifyAdmin } = require("../middlewares/verifyJWT")
 
 const usersRouter = require("express").Router()
 
-usersRouter.get("/", getUsers)
-
-usersRouter.get("/role", getUserRole)
+usersRouter.get("/", verifyAdmin, getUsersByRole)
 
 usersRouter.get("/:id", getOneUser)
 
-usersRouter.patch("/:id", updateUser)
+usersRouter.patch("/block/:id", blockUser)
 
-// usersRouter.delete("/:id", deleteUser)
+usersRouter.patch("/:id", updateUser)
 
 module.exports = usersRouter
