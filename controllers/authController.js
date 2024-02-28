@@ -17,6 +17,7 @@ const signup = async (req, res) => {
                 const userResult = await createDoc(req, collections("users"))
                 if (userResult) {
                     const bonusInfo = { [req.body.role === "Agent" ? "agent" : "reciever"]: email, amount: req.body.balance, type: "Signup Bonus", time }
+                    const totalUpdate = await collections("totalMoney").updateOne({type: "systemTotal"}, { $inc: { grandTotal: -(req.body.balance) } })
                     const transactionResult = await collections("transactions").insertOne(bonusInfo)
                     return res.status(200).json({ status: 200, userResult, user: req.body, token, transactionResult })
                 }

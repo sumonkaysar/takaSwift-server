@@ -50,9 +50,24 @@ const blockUser = async (req, res) => {
   }
 }
 
+const searchUser = async (req, res) => {
+  try {
+    const { mobile } = req.query
+    const user = await collections("users").findOne({ mobile: { '$regex': mobile, '$options': 'i' }, role: "User" })
+    if (user?.email) {
+      return res.status(200).json({ user, status: 200 })
+    }
+    res.status(404).json({ error: 'Not Found' });
+  } catch (err) {
+    console.log(err)
+    res.status(500).json({ error: 'Internal Server Error' });
+  }
+}
+
 module.exports = {
   getUsersByRole,
   updateUser,
   getOneUser,
   blockUser,
+  searchUser,
 }

@@ -16,6 +16,10 @@ const sendMoney = async (req, res) => {
         const senderBalance = await collections("users").updateOne({ email }, { $inc: { balance: updatedAmount } })
         const reciverBalance = await collections("users").updateOne({ mobile }, { $inc: { balance: amount } })
         const adminBalance = await collections("users").updateOne({ role: "Admin" }, { $inc: { balance: 5 } })
+        if (amount <=  100) {
+          const totalUpdate = await collections("totalMoney").updateOne({ type: "systemTotal" }, { $inc: { grandTotal: -5 } })
+        }
+
         const transaction = await collections("transactions").insertOne({ user: email, amount: updatedAmount, reciever: user.email, recievedAmount: amount, type: "Send Money", time, transactionId })
         const transaction2 = await collections("transactions").insertOne({ senderEmail: email, amount: 5, recieverEmail: user.email, recievedAmount: amount, type: "Admin Bonus", bonusFrom: "Send Money", time, transactionId })
         return res.status(200).json({ status: 200, message: "Money send successfully" })
